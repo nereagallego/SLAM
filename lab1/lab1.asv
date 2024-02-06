@@ -255,13 +255,12 @@ global config;
 n = length(map.true_ids)-1;
 matrix = zeros(n);  % Create a square matrix of zeros
 matrix(sub2ind([n, n], map.true_ids(2:end) , map.true_ids(2:end))) = 1;
-H_k = [-1 * ones(n, 1), matrix];
-y_k = measurements.z_n - H_k * map.hat_x;
-S_k = H_k * map.hat_P * H_k' + measurements.R_n;
-K_k = map.hat_P * H_k' * inv(S_k);
-map.hat_x = map.hat_x + K_k * y_k;
-map.hat_P = (eye(length(map.true_ids)) - K_k * H_k) * map.hat_P;
-
+H_k = [-1 * ones(n, 1), matrix]
+y_k = measurements.z_n - H_k * map.hat_x
+S_k = H_k * map.hat_P * H_k' + measurements.R_n
+K_k = map.hat_P * H_k' * inv(S_k)
+map.hat_x = map.hat_x + K_k * y_k
+map.hat_P = (eye(length(map.true_ids)) - K_k * H_k) * map.hat_P
 
 if config.step_by_step
     fprintf('Updape map for last %d features...\n',length(measurements.ids_f));
@@ -281,16 +280,16 @@ global world;
 
 % DO SOMETHING HERE!
 % update map.hat_x, map.hat_P, map.true_ids, map.true_x, map.n
-n = length(measurements.z_n);
-A = ones(length(map.hat_x') + n, length(map.hat_x'));
-B = [zeros(length(map.hat_x'), n); diag(ones(n, 1))];
-map.hat_x = A * map.hat_x + B * measurements.z_n;
+n = length(measurements.z_n)
+A = ones(length(map.hat_x') + n, length(map.hat_x'))
+B = [zeros(length(map.hat_x'), n); diag(ones(n, 1))]
+map.hat_x = A * map.hat_x' + B * measurements.z_n
 
-map.hat_P = A * map.hat_P * A' + B * measurements.R_n * B';
+map.hat_P = A * map.hat_P * A' + B * measurements.R_n * B'
 
-map.true_ids = [map.true_ids, measurements.ids_n'];
-map.true_x = [map.true_x, world.true_point_locations(measurements.ids_n)'];
-map.n = map.n + length(measurements.ids_n);
+map.true_ids = [map.true_ids, measurements.ids_n']
+map.true_x = [map.true_x, world.true_point_locations(measurements.ids_n)']
+map.n = map.n + length(measurements.ids_n)
 
 
 if config.step_by_step
