@@ -256,8 +256,9 @@ n = length(map.true_ids)-1;
 matrix = zeros(n);  % Create a square matrix of zeros
 matrix(sub2ind([n, n], map.true_ids(2:end) , map.true_ids(2:end))) = 1;
 H_k = [-1 * ones(n, 1), matrix];
-y_k = measurements.z_n - H_k * map.hat_x;
+y_k = [measurements.z_f; measurements.z_n] - H_k * map.hat_x;
 S_k = H_k * map.hat_P * H_k' + measurements.R_n;
+inv(S_k)
 K_k = map.hat_P * H_k' * inv(S_k);
 map.hat_x = map.hat_x + K_k * y_k;
 map.hat_P = (eye(length(map.true_ids)) - K_k * H_k) * map.hat_P;
