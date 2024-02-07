@@ -89,8 +89,8 @@ global map;
 %            R_k: covariance of z_k
 %          ids_f: true ids of the ones that are already in the map
 %          ids_n: true ids of the ones that new to the map
-%        z_pos_f: positions in z_r of ids_f
-%        z_pos_n: positions in z_r of ids_n
+%        z_pos_f: positions in z_k of ids_f
+%        z_pos_n: positions in z_k of ids_n
 %        x_pos_f: positions in hat_x of ids_f
 %            z_f: z_k(ids_f), measurements to features already in the map
 %            R_f: R_k(ids_f), meas. cov. to features already in the map
@@ -252,13 +252,11 @@ global config;
 
 % DO SOMETHING HERE!
 % You need to compute H_k, y_k, S_k, K_k and update map.hat_x and map.hat_P
-n = length(map.true_ids)-1;
-matrix = zeros(n);  % Create a square matrix of zeros
-matrix(sub2ind([n, n], map.true_ids(2:end) , map.true_ids(2:end))) = 1;
-H_k = [-1 * ones(n, 1), matrix];
+matrix = zeros(length(measurements.z_k),map.n);  % Create a square matrix of zeros
+matrix(sub2ind([length(measurements.z_k), map.n], measurements.z_pos_f , measurements.ids_f)) = 1;
+H_k = [-1 * ones(length(measurements.z_k), 1), matrix];
 % TODO: it should be the prediction and the innovation
-z_f = map.true_x'-map.true_x(1);
-y_k = z_f(2:end) - H_k * map.hat_x; 
+y_k = measurements.z_k - H_k * map.hat_x; 
 % y_k = [measurements.z_f; measurements.z_n] - H_k * map.hat_x;
 S_k = H_k * map.hat_P * H_k' + measurements.R_f;
 inv(S_k)
