@@ -252,14 +252,13 @@ global config;
 
 % DO SOMETHING HERE!
 % You need to compute H_k, y_k, S_k, K_k and update map.hat_x and map.hat_P
-matrix = zeros(length(measurements.z_k),map.n);  % Create a square matrix of zeros
-matrix(sub2ind([length(measurements.z_k), map.n], measurements.z_pos_f , measurements.ids_f)) = 1;
-H_k = [-1 * ones(length(measurements.z_k), 1), matrix];
+matrix = zeros(length(measurements.z_f),map.n);  % Create a square matrix of zeros
+matrix(sub2ind([length(measurements.z_f), map.n], measurements.z_pos_f , measurements.ids_f)) = 1;
+H_k = [-1 * ones(length(measurements.z_f), 1), matrix];
 % TODO: it should be the prediction and the innovation
-y_k = measurements.z_k - H_k * map.hat_x; 
+y_k = measurements.z_f - H_k * map.hat_x; 
 % y_k = [measurements.z_f; measurements.z_n] - H_k * map.hat_x;
 S_k = H_k * map.hat_P * H_k' + measurements.R_f;
-inv(S_k)
 K_k = map.hat_P * H_k' / S_k;
 map.hat_x = map.hat_x + K_k * y_k;
 map.hat_P = (eye(length(map.true_ids)) - K_k * H_k) * map.hat_P;
@@ -292,7 +291,7 @@ map.hat_x = A * map.hat_x + B * measurements.z_n;
 map.hat_P = A * map.hat_P * A' + B * measurements.R_n * B';
 
 map.true_ids = [map.true_ids, measurements.ids_n'];
-map.true_x = [map.true_x, world.true_point_locations(measurements.ids_n)'];
+map.true_x = [map.true_x; world.true_point_locations(measurements.ids_n)];
 map.n = map.n + length(measurements.ids_n);
 
 
