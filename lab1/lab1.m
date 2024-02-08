@@ -252,12 +252,23 @@ global config;
 
 % DO SOMETHING HERE!
 % You need to compute H_k, y_k, S_k, K_k and update map.hat_x and map.hat_P
-matrix = zeros(length(measurements.z_f),map.n);  % Create a square matrix of zeros
-matrix(sub2ind([length(measurements.z_f), map.n], measurements.z_pos_f , measurements.ids_f)) = 1;
-H_k = [-1 * ones(length(measurements.z_f), 1), matrix];
-% TODO: it should be the prediction and the innovation
+% matrix = zeros(length(measurements.z_f),map.n);  % Create a square matrix of zeros
+% matrix(sub2ind([length(measurements.z_f), map.n], measurements.z_pos_f , measurements.ids_f)) = 1;
+% H_k = [-1 * ones(length(measurements.z_f), 1), matrix];
+% Assuming measurements.z_f, measurements.z_pos_f, measurements.ids_f, and map.n are defined
+
+% Create a sparse matrix
+rows = length(measurements.z_f);
+cols = map.n + 1; % Adding 1 for the column of -1's
+H_k = sparse(rows, cols);
+
+% Fill in the values
+H_k(:, 1) = -1; % First column filled with -1's
+indices = sub2ind([rows, map.n], measurements.z_pos_f, measurements.ids_f);
+H_k(sub2ind([rows, cols], (1:rows)', indices + 1)) = 1; % Set corresponding elements to 1
+
 y_k = measurements.z_f - H_k * map.hat_x; 
-% y_k = [measurements.z_f; measurements.z_n] - H_k * map.hat_x;
+
 S_k = H_k * map.hat_P * H_k' + measurements.R_f;
 K_k = map.hat_P * H_k' / S_k;
 map.hat_x = map.hat_x + K_k * y_k;
@@ -283,7 +294,6 @@ global world;
 % DO SOMETHING HERE!
 % update map.hat_x, map.hat_P, map.true_ids, map.true_x, map.n
 n = length(measurements.z_n);
-% A = ones(length(map.hat_x') + n, length(map.hat_x'));
 A = [eye(length(map.hat_x'), length(map.hat_x')); ones(n,1), zeros(n,length(map.hat_x')-1)];
 B = [zeros(length(map.hat_x'), n); diag(ones(n, 1))];
 map.hat_x = A * map.hat_x + B * measurements.z_n;
