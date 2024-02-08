@@ -68,6 +68,8 @@ sensor.range_max = 2;
 %-------------------------------------------------------------------------
 % all map details
 
+global map1;
+global map2;
 global map;
 
 %            R0: absolute location of base reference for map
@@ -102,7 +104,10 @@ global map;
 % BEGIN
 %-------------------------------------------------------------------------
 
-[map] = Kalman_filter_slam (map, config.steps_per_map);
+[map1] = Kalman_filter_slam (map1, config.steps_per_map);
+[map2] = Kalman_filter_slam(map2, config.steps_per_map);
+
+[map] = map_joining(map1, map2);
 
 display_map_results (map);
 
@@ -255,7 +260,6 @@ global config;
 % matrix = zeros(length(measurements.z_f),map.n);  % Create a square matrix of zeros
 % matrix(sub2ind([length(measurements.z_f), map.n], measurements.z_pos_f , measurements.ids_f)) = 1;
 % H_k = [-1 * ones(length(measurements.z_f), 1), matrix];
-% Assuming measurements.z_f, measurements.z_pos_f, measurements.ids_f, and map.n are defined
 
 % Create a sparse matrix
 rows = length(measurements.z_f);
@@ -399,4 +403,19 @@ function Corr=correlation(Cov)
 sigmas = sqrt(diag(Cov));
 Corr = diag(1./sigmas)*Cov*diag(1./sigmas);
 
+end
+
+function [map] = map_joining(map1, map2)
+% Linear combination of gaussian variables
+    x1 = map1.hat_x;
+    x2 = map2.hat_x;
+
+    P1 = map1.hat_P;
+    P2 = map2.hat_P;
+
+    A = [eye(length(x1)); ones(length(x2)-1,1), zeros(length(x2)-1,length(x1')-1)];
+    B = [1, zeros(1,length(x2)-1); zeros(length(x1)-1,length(x2)); 0, eye(length(x2)-1)];
+
+    x = A * x1 + B * x2;
+    P = A * P1 * A' + B * P2 * B';
 end
