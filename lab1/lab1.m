@@ -105,6 +105,7 @@ global map;
 %-------------------------------------------------------------------------
 
 [map1] = Kalman_filter_slam (map1, config.steps_per_map);
+display_map_results(map1)
 [map2] = Kalman_filter_slam(map2, config.steps_per_map);
 
 [map] = map_joining(map1, map2);
