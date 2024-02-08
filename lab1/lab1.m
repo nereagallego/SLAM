@@ -414,8 +414,8 @@ function [map] = map_joining(map1, map2)
     P1 = map1.hat_P;
     P2 = map2.hat_P;
 
-    A = [eye(length(x1)); ones(length(x2)-1,1), zeros(length(x2)-1,length(x1')-1)];
-    B = [1, zeros(1,length(x2)-1); zeros(length(x1)-1,length(x2)); 0, eye(length(x2)-1)];
+    A = [eye(length(x1')); ones(length(x2')-1,1), zeros(length(x2')-1,length(x1')-1)];
+    B = [1, zeros(1,length(x2')-1); zeros(length(x1')-1,length(x2')); 0, eye(length(x2')-1)];
 
     x = A * x1 + B * x2;
     P = A * P1 * A' + B * P2 * B';
