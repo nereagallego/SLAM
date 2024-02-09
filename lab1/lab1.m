@@ -70,6 +70,8 @@ sensor.range_max = 2;
 
 global map1;
 global map2;
+global map3;
+global map4;
 global map;
 
 %            R0: absolute location of base reference for map
@@ -105,10 +107,10 @@ global map;
 %-------------------------------------------------------------------------
 
 [map1] = Kalman_filter_slam (map1, config.steps_per_map);
-% display_map_results(map1)
 [map2] = Kalman_filter_slam(map2, config.steps_per_map);
-% display_map_results(map2)
-[map] = map_joining(map1, map2);
+[map3] = Kalman_filter_slam(map3, config.steps_per_map);
+[map4] = Kalman_filter_slam(map4, config.steps_per_map);
+[map] = map_joining([map1, map2, map3, map4]);
 
 display_map_results (map);
 
@@ -447,15 +449,17 @@ global world;
     
 end
 
-function [map] = map_joining(map1, map2)
-    global world;
-    % Linear combination of gaussian variables
+function [map] = map_joining(maps)
+global world;
+
+    for i = 2:length(maps)
+        % Linear combination of gaussian variables
         tstart = tic;
-        x1 = map1.hat_x;
-        x2 = map2.hat_x;
+        x1 = maps(1).hat_x;
+        x2 = maps(i).hat_x;
     
-        P1 = map1.hat_P;
-        P2 = map2.hat_P;
+        P1 = maps(1).hat_P;
+        P2 = maps(i).hat_P;
     
         A = [eye(length(x1')); ones(length(x2')-1,1), zeros(length(x2')-1,length(x1')-1)];
         B = [1, zeros(1,length(x2')-1); zeros(length(x1')-1,length(x2')); zeros(length(x2')-1,1), eye(length(x2')-1)];
@@ -464,19 +468,21 @@ function [map] = map_joining(map1, map2)
         x = A * x1 + B * x2;
         P = A * P1 * A' + B * P2 * B';
     
-        map.R0 = map1.R0;
-        map.hat_x = x;
-        map.hat_P = P;
-        map.n = map1.n + map2.n;
-        map.true_ids = [map1.true_ids, map2.true_ids(2:end)];
-        map.true_x = [map1.true_x; map2.true_x(2:end)];
-        map.stats.true_x = [map1.stats.true_x; map2.stats.true_x + map1.stats.true_x(end)];
-        map.stats.error_x = [map1.stats.error_x; map2.stats.error_x + map1.stats.error_x(end)];
-        map.stats.sigma_x = [map1.stats.sigma_x; sqrt(map2.stats.sigma_x.^2 + map1.stats.sigma_x(end) ^2)];
+        maps(1).R0 = maps(1).R0;
+        maps(1).hat_x = x;
+        maps(1).hat_P = P;
+        maps(1).n = maps(1).n + maps(i).n;
+        maps(1).true_ids = [maps(1).true_ids, maps(i).true_ids(2:end)];
+        maps(1).true_x = [maps(1).true_x; maps(i).true_x(2:end)];
+        maps(1).stats.true_x = [maps(1).stats.true_x; maps(i).stats.true_x + maps(1).stats.true_x(end)];
+        maps(1).stats.error_x = [maps(1).stats.error_x; maps(i).stats.error_x + maps(1).stats.error_x(end)];
+        maps(1).stats.sigma_x = [maps(1).stats.sigma_x; sqrt(maps(i).stats.sigma_x.^2 + maps(1).stats.sigma_x(end) ^2)];
     
         tend = toc(tstart);
     
-        map2.stats.cost_t(end) = map2.stats.cost_t(end) + tend;
-        map.stats.cost_t = [map1.stats.cost_t; map2.stats.cost_t];
-        
+        maps(i).stats.cost_t(end) = maps(i).stats.cost_t(end) + tend;
+        maps(1).stats.cost_t = [maps(1).stats.cost_t; maps(i).stats.cost_t];
     end
+    map = maps(1);
+        
+end
