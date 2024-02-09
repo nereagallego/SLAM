@@ -105,9 +105,9 @@ global map;
 %-------------------------------------------------------------------------
 
 [map1] = Kalman_filter_slam (map1, config.steps_per_map);
-display_map_results(map1)
+% display_map_results(map1)
 [map2] = Kalman_filter_slam(map2, config.steps_per_map);
-
+% display_map_results(map2)
 [map] = map_joining(map1, map2);
 
 display_map_results (map);
@@ -158,7 +158,7 @@ for k = 0:steps
     end
     
     % get measurements
-    [measurements] = get_measurements_and_data_association(map);
+    [measurements, map] = get_measurements_and_data_association(map);
     
     % seen features already in the map? KF update!
     if not(isempty(measurements.z_f))
@@ -176,6 +176,7 @@ for k = 0:steps
     map.stats.cost_t = [map.stats.cost_t; toc(tstart)];
     
 end
+% world.max_beeper_id = max(map.true_ids);
 end
 
 %-------------------------------------------------------------------------
@@ -214,15 +215,19 @@ end
 % get_measurements
 %-------------------------------------------------------------------------
 
-function [measurements] = get_measurements_and_data_association(map)
+function [measurements,map] = get_measurements_and_data_association(map)
 
 global world;
 global sensor;
+
 
 distances = world.true_point_locations - world.true_robot_location;
 visible_ids = find((distances >= sensor.range_min) & (distances <= sensor.range_max));
 visible_d = distances(visible_ids);
 n_visible = length(visible_ids);
+if map.n == 0
+    map.max_beeper_id = visible_ids(1) - 1;
+end
 
 % sensor error
 sigma_z = sensor.factor_z * visible_d;
@@ -255,6 +260,7 @@ end
 function[map] = update_map (map, measurements)
 
 global config;
+global world;
 
 % DO SOMETHING HERE!
 % You need to compute H_k, y_k, S_k, K_k and update map.hat_x and map.hat_P
@@ -269,7 +275,7 @@ H_k = sparse(rows, cols);
 
 % Fill in the values
 H_k(:, 1) = -1; % First column filled with -1's
-indices = sub2ind([rows, map.n], measurements.z_pos_f, measurements.ids_f);
+indices = sub2ind([rows, map.n], measurements.z_pos_f, measurements.ids_f - map.max_beeper_id);
 H_k(sub2ind([rows, cols], (1:rows)', indices + 1)) = 1; % Set corresponding elements to 1
 
 y_k = measurements.z_f - H_k * map.hat_x; 
@@ -324,6 +330,7 @@ end
 function  display_map_results (map)
 
 global config;
+global world;
 
 config.fig = config.fig + 1;
 figure(config.fig);
@@ -406,8 +413,10 @@ Corr = diag(1./sigmas)*Cov*diag(1./sigmas);
 
 end
 
-function [map] = map_joining(map1, map2)
+function [map] = map_joining2(map1, map2)
+global world;
 % Linear combination of gaussian variables
+    tstart = tic;
     x1 = map1.hat_x;
     x2 = map2.hat_x;
 
@@ -415,8 +424,59 @@ function [map] = map_joining(map1, map2)
     P2 = map2.hat_P;
 
     A = [eye(length(x1')); ones(length(x2')-1,1), zeros(length(x2')-1,length(x1')-1)];
-    B = [1, zeros(1,length(x2')-1); zeros(length(x1')-1,length(x2')); 0, eye(length(x2')-1)];
+    B = [1, zeros(1,length(x2')-1); zeros(length(x1')-1,length(x2')); zeros(length(x2')-1,1), eye(length(x2')-1)];
 
+    
     x = A * x1 + B * x2;
     P = A * P1 * A' + B * P2 * B';
+
+    map.R0 = map1.R0;
+    map.hat_x = x;
+    map.hat_P = P;
+    map.n = map1.n + map2.n;
+    map.true_ids = [map1.true_ids, map2.true_ids(2:end)];
+    map.true_x = [map1.true_x; map2.true_x(2:end)];
+    map.stats.true_x = [map1.stats.true_x; map2.stats.true_x + map1.stats.true_x(end)];
+    map.stats.error_x = [map1.stats.error_x; map2.stats.error_x + map1.stats.error_x(end)];
+    map.stats.sigma_x = [map1.stats.sigma_x; sqrt(map2.stats.sigma_x.^2 + map1.stats.sigma_x(end) ^2)];
+
+    tend = toc(tstart);
+
+    map2.stats.cost_t(end) = map2.stats.cost_t(end) + tend;
+    map.stats.cost_t = [map1.stats.cost_t; map2.stats.cost_t];
+    
 end
+
+function [map] = map_joining(map1, map2)
+    global world;
+    % Linear combination of gaussian variables
+        tstart = tic;
+        x1 = map1.hat_x;
+        x2 = map2.hat_x;
+    
+        P1 = map1.hat_P;
+        P2 = map2.hat_P;
+    
+        A = [eye(length(x1')); ones(length(x2')-1,1), zeros(length(x2')-1,length(x1')-1)];
+        B = [1, zeros(1,length(x2')-1); zeros(length(x1')-1,length(x2')); zeros(length(x2')-1,1), eye(length(x2')-1)];
+    
+        
+        x = A * x1 + B * x2;
+        P = A * P1 * A' + B * P2 * B';
+    
+        map.R0 = map1.R0;
+        map.hat_x = x;
+        map.hat_P = P;
+        map.n = map1.n + map2.n;
+        map.true_ids = [map1.true_ids, map2.true_ids(2:end)];
+        map.true_x = [map1.true_x; map2.true_x(2:end)];
+        map.stats.true_x = [map1.stats.true_x; map2.stats.true_x + map1.stats.true_x(end)];
+        map.stats.error_x = [map1.stats.error_x; map2.stats.error_x + map1.stats.error_x(end)];
+        map.stats.sigma_x = [map1.stats.sigma_x; sqrt(map2.stats.sigma_x.^2 + map1.stats.sigma_x(end) ^2)];
+    
+        tend = toc(tstart);
+    
+        map2.stats.cost_t(end) = map2.stats.cost_t(end) + tend;
+        map.stats.cost_t = [map1.stats.cost_t; map2.stats.cost_t];
+        
+    end
