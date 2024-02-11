@@ -2,6 +2,7 @@
 % University of Zaragoza
 %
 % Author:  J. Neira
+% Modifiedd by: César Borja and Nerea Gallego
 %-------------------------------------------------------------------------
 % SLAM for Karel the robot in 1D
 %-------------------------------------------------------------------------
