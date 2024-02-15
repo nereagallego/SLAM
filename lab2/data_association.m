@@ -1,5 +1,5 @@
 %-------------------------------------------------------
-function [H, GT, compatibility] = data_association(map, observations, step),
+function [H, GT, compatibility] = data_association(map, observations, step)
 %-------------------------------------------------------
 global configuration ground;
 
