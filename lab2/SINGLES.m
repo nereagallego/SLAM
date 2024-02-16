@@ -22,4 +22,15 @@ H = zeros(1, observations.m);
 % compatibility.ic(i,j) = 1 if observation i is a neighbour of
 % feature j.
             
-configuration.name = 'SINGLES';
+for i = 1:observations.m
+    % Check if observation i has only one neighbor
+    neighbors = find(compatibility.ic(i,:)); % Find indices of neighbors of observation i
+    if numel(neighbors) == 1
+        % Check if the neighbor has only one neighbor (which is observation i)
+        neighbor_index = neighbors(1);
+        if sum(compatibility.ic(:, neighbor_index)) == 1
+            % Set H(i) = neighbor_index
+            H(i) = neighbor_index;
+        end
+    end
+end
