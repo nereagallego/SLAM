@@ -31,19 +31,19 @@ e = [map.estimated(:).x];
 es = [map.estimated(:).P];
 
 figure; hold on;
-subplot(2, 2, 1); hold on;
+subplot(1, 3, 1); hold on; axis square;
 title('Vehicle error in x (m)');
 plot(g(1,:)-e(1,:), 'b-');
 plot(sqrt(chi2(1)*es(1,1:3:end)), 'r-');
 plot(-sqrt(chi2(1)*es(1,1:3:end)), 'r-');
 
-subplot(2, 2, 2); hold on;
+subplot(1, 3, 2); hold on; axis square;
 title('Vehicle error in y (m)');
 plot(g(2,:)-e(2,:), 'b-');
 plot(sqrt(chi2(1)*es(2,2:3:end)), 'r-');
 plot(-sqrt(chi2(1)*es(2,2:3:end)), 'r-');
 
-subplot(2, 2, 3); hold on;
+subplot(1, 3, 3); hold on; axis square;
 title('Vehicle error in theta (deg)');
 plot((normalize(g(3,:)-e(3,:)))*180/pi, 'b-');
 plot(sqrt(chi2(1)*es(3,3:3:end))*180/pi, 'r-');

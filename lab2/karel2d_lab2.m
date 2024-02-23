@@ -177,9 +177,17 @@ for step = 2 : steps,
     %
     % unreliable: features seen only once, more than two steps ago
 
-    % unreliable = ; 
-    % map = erase_features(map, unreliable);
-    
+    %unreliable = find(map.hits == 1 & step - map.first > 2);
+    %map = erase_features(map, unreliable);
+
+    % when using SINGLES without odometry (and without maintenance).
+    % - the robot thinks it is not moving (no odometry)
+    % - the robot is seeing features
+    % - the error in the prediction is very high, so the compatibility is not gonna be 1 - 1
+    % - SINGLES will not be able to match the features
+    % If we would at least do a match, KF would be able to correct the error and the
+    % position of the robot would be corrected.
+
     draw_map (map, ground, step);
     results = store_results(results, observations, GT, H);
 end

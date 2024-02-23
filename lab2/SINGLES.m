@@ -29,7 +29,6 @@ for i = 1:observations.m
         % Check if the neighbor has only one neighbor (which is observation i)
         neighbor_index = neighbors(1);
         if sum(compatibility.ic(:, neighbor_index)) == 1
-            % Set H(i) = neighbor_index
             H(i) = neighbor_index;
         end
     end
