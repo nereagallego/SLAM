@@ -16,7 +16,7 @@ global configuration;
 configuration.ellipses = 1;
 configuration.samples = 0;
 configuration.tags = 0;
-configuration.odometry = 1;
+configuration.odometry = 0;
 configuration.noise = 1;
 configuration.alpha = 0.99; % only useful is chi2inv is available
 configuration.step_by_step = 0;
@@ -39,7 +39,7 @@ configuration.covisibility = 9;
 global map;
 %-------------------------------------------------------
 %             n: number of features
-%             x: state vector
+%             x: state vector 
 %             P: covariance matrix
 %     ground_id: true ids of features mapped
 %          hits: times a feature has been detected

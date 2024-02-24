@@ -24,4 +24,4 @@ for i = 1:observations.m,
     end    
 end
 
-configuration.name = 'NEAREST NEIGHBOUR';
+configuration.name = 'NN';

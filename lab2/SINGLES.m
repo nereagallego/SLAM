@@ -33,3 +33,5 @@ for i = 1:observations.m
         end
     end
 end
+
+configuration.name = 'SINGLES';
