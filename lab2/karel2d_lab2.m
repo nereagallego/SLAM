@@ -177,7 +177,7 @@ for step = 2 : steps,
     %
     % unreliable: features seen only once, more than two steps ago
 
-    unreliable = find((map.hits >= 1 & map.hits <= 10) & step - map.first > 10);
+    unreliable = find((map.hits >= 1 & map.hits <= 4) & step - map.first > 4);
     map = erase_features(map, unreliable);
 
     % when using SINGLES without odometry (and without maintenance).

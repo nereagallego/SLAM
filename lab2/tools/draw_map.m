@@ -44,9 +44,9 @@ end
 plot(ground.points(1, ground_id), ground.points(2, ground_id), 'r.');
 
 if configuration.people
-    for p=1:size(people.x,2),
-    plot(people.x(:,p), people.y(:,p), 'r.');
-end
+    for p=1:size(people.x,2)
+       plot(people.x(:,p), people.y(:,p), '.', 'Color', [0.5, 0, 0.5]);
+    end
 end
 
 title(sprintf('MAP at Step %d, features: %d, algorithm: %s', step, map.n, configuration.name));
