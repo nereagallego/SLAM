@@ -1,0 +1,10 @@
+Thirdparty/g2o/lib/
+Thirdparty/g2o/bin/
+Thirdparty/OpenCV/
+Thirdparty/Pangolin/
+
+build/
+
+Lab0/Apps/task_1
+Lab0/Apps/task_2
+Lab0/Apps/task_3
