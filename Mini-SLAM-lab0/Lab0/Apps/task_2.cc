@@ -26,6 +26,9 @@ int main() {
     // delete regression;
 
     // Estimate the value of an apartment of 100 m² and 4 rooms
+    Eigen::Vector3f v = Eigen::Vector3f(1.0, 100, 4);
+    const float pred = regression->Estimate(v);
+    std::cout << "Predicted price = " << pred << endl;
 
     delete regression;
 

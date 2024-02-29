@@ -9,11 +9,15 @@ using namespace std;
 // Applies one motion to the robot position.
 void MoveRobot(Sophus::SE3f& robot_transform_world,
                Sophus::SE3f& motion) {
+    robot_transform_world = robot_transform_world * motion;
 }
 
 // Applies all motions to the robot position stored in motions.
 void MoveRobotSeveralTimes(Sophus::SE3f& robot_transform_world,
                            std::vector<Sophus::SE3f>& motions) {
+    for (auto& motion : motions) {
+        MoveRobot(robot_transform_world, motion);
+    }
 
 }
 

@@ -72,7 +72,7 @@ void Regression::ComputeRegressionWeights() {
     // Recover the optimized weights.
     theta_ = weight_vertex->estimate().cast<float>();
 
-    // cerr << "Computed weights: " << solution_.transpose() << endl;
+    // cerr << "Computed weights: " << theta_.transpose() << endl;
 }
 
 Eigen::Vector3f Regression::GetComputedWeights() {
@@ -80,11 +80,19 @@ Eigen::Vector3f Regression::GetComputedWeights() {
 }
 
 float Regression::ComputeRMSE() {
-    return 0;
+    const int n_entries = x_.rows();
+    float rmse = 0;
+    for (int idx = 0; idx < n_entries; idx++) {
+        Eigen::Vector3f v = Eigen::Vector3f(1.0, x_(idx, 0), x_(idx, 1));
+        const float error = y_(idx) - Estimate(v);
+        rmse += error * error;
+    }
+
+    return sqrt(rmse / n_entries);
 }
 
 float Regression::Estimate(const Eigen::Vector3f x) const {
-    return 0;
+    return theta_.dot(x);
 }
 
 void Regression::LoadDataFromFile(const std::string &data_file) {
