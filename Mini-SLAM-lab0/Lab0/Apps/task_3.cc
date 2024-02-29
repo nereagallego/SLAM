@@ -8,7 +8,13 @@ using namespace std;
 
 
 void ComputeXGradient(const cv::Mat& image, cv::Mat& gradient_x) {
+    // Define the kernel for the x-gradient.
+    cv::Mat kernel_x = (cv::Mat_<float>(3, 3) << -1, 0, 1,
+            -2, 0, 2,
+            -1, 0, 1);
 
+    // Apply the kernel to the image.
+    cv::filter2D(image, gradient_x, -1, kernel_x);
 }
 
 int main() {
