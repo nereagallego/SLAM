@@ -57,9 +57,47 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
             continue;
         }
 
-        /*
-         * Your code for Lab 3 - Task 1 here!
-         */
+        // vMatches[i] = -1; if no match is found
+        // vMatches[i] = j; if the i-th keypoint in refFrame matches with the j-th keypoint in currFrame
+        // The parameter th indicates the minimum Hamming distance between 2 descriptors to be considered a matching candidate
+        // The parameter vMatches is an output parameter that will contain the matches found
+        // Dont allow to assign j to two different i
+
+        currFrame.getFeaturesInArea(vRefKeys[i].pt.x,vRefKeys[i].pt.y,th,minOctave, maxOctave,vIndicesToCheck);
+
+        int bestDist = 255, secondBestDist = 255;
+        size_t bestIdx;
+
+        for(auto j : vIndicesToCheck){
+            int dist = HammingDistance(refDesc.row(i),currDesc.row(j));
+
+            if(dist < bestDist){
+                secondBestDist = bestDist;
+                bestDist = dist;
+                bestIdx = j;
+            }
+            else if(dist < secondBestDist){
+                secondBestDist = dist;
+            }
+        }
+
+        if((float)bestDist < (float(secondBestDist)*0.9)){
+            // Check if j is already assigned to some i
+            if (vnMatches21[bestIdx] != -1){
+                if (bestDist < vMatchedDistance[vnMatches21[bestIdx]]){
+                    vMatches[vnMatches21[bestIdx]] = -1;
+                    nMatches--;
+                }
+                else
+                    continue;
+            } 
+
+            vMatchedDistance[i] = bestDist;
+            vMatches[i] = bestIdx;
+            vnMatches21[bestIdx] = i;
+        } else {
+            vMatches[i] = -1;
+        }
     }
 
     for(size_t i = 0; i < vMatches.size(); i++){
