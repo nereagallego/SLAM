@@ -95,6 +95,7 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
             vMatchedDistance[i] = bestDist;
             vMatches[i] = bestIdx;
             vnMatches21[bestIdx] = i;
+            nMatches ++;
         } else {
             vMatches[i] = -1;
         }
