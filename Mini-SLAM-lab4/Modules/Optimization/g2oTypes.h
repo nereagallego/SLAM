@@ -74,10 +74,14 @@ public:
         Eigen::Vector3d p3Dw = v2->estimate();  //Predicted 3D world position  of the point
         g2o::SE3Quat Tcw = v1->estimate();      //Preficted camera pose
 
-        /*
-         * Your code for Lab 3 - Task 3 here! Example:
-         * _error = Eigen::Vector2d::Ones()*100;
-         */
+        // Map the 3D point to the camera frame
+        Eigen::Vector3d p3Dc = Tcw.map(p3Dw);
+
+        // Project the 3D point to the image plane
+        Eigen::Vector2d p2D = pCamera->project(p3Dc);
+
+        // Compute the error
+        _error = obs - p2D;
     }
 
     bool isDepthPositive() {
@@ -106,10 +110,14 @@ public:
         Eigen::Vector2d obs(_measurement);  //Observed point in the image
         g2o::SE3Quat Tcw = v1->estimate();  //Preficted camera pose
 
-        /*
-        * Your code for Lab 3 - Task 3 here! Example:
-        * _error = Eigen::Vector2d::Ones()*100;
-        */
+        // Map the 3D point to the camera frame
+        Eigen::Vector3d p3Dc = Tcw.map(Xworld);
+
+        // Project the 3D point to the image plane
+        Eigen::Vector2d p2D = pCamera->project(p3Dc);
+
+        // Compute the error
+        _error = obs - p2D; 
     }
 
     bool isDepthPositive() {
