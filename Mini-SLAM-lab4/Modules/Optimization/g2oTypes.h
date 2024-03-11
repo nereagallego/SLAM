@@ -74,14 +74,12 @@ public:
         Eigen::Vector3d p3Dw = v2->estimate();  //Predicted 3D world position  of the point
         g2o::SE3Quat Tcw = v1->estimate();      //Preficted camera pose
 
-        // Map the 3D point to the camera frame
-        Eigen::Vector3d p3Dc = Tcw.map(p3Dw);
+        // Pose only Bundle Adjustment
+        // Implement here the reprojection error
 
-        // Project the 3D point to the image plane
-        Eigen::Vector2d p2D = pCamera->project(p3Dc);
-
-        // Compute the error
-        _error = obs - p2D;
+        Eigen::Vector3d temp = Tcw.map(p3Dw);
+        _error = obs - pCamera->project(temp);
+       
     }
 
     bool isDepthPositive() {
@@ -110,14 +108,12 @@ public:
         Eigen::Vector2d obs(_measurement);  //Observed point in the image
         g2o::SE3Quat Tcw = v1->estimate();  //Preficted camera pose
 
-        // Map the 3D point to the camera frame
-        Eigen::Vector3d p3Dc = Tcw.map(Xworld);
+        // Pose only Bundle Adjustment
+        // Implement here the reprojection error
 
-        // Project the 3D point to the image plane
-        Eigen::Vector2d p2D = pCamera->project(p3Dc);
+        Eigen::Vector3d temp = Tcw.map(Xworld);
+        _error = obs - pCamera->project(temp);
 
-        // Compute the error
-        _error = obs - p2D; 
     }
 
     bool isDepthPositive() {
