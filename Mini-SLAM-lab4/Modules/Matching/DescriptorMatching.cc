@@ -81,7 +81,7 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
             }
         }
 
-        if((float)bestDist < (float(secondBestDist)*0.9)){
+        if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.8)){
             // Check if j is already assigned to some i
             if (vnMatches21[bestIdx] != -1){
                 if (bestDist < vMatchedDistance[vnMatches21[bestIdx]]){
@@ -145,7 +145,7 @@ int guidedMatching(Frame& refFrame, Frame& currFrame, int th, std::vector<int>& 
         cv::Mat desc = vRefMapPoints[i]->getDescriptor();
 
         //Match with the one with the smallest Hamming distance
-        int bestDist = 255, secondBestDist = 255;
+        int bestDist = 255 , secondBestDist = 255;
         size_t bestIdx;
         for(auto j : vIndicesToCheck){
             if(currFrame.getMapPoint(j)){
@@ -163,9 +163,11 @@ int guidedMatching(Frame& refFrame, Frame& currFrame, int th, std::vector<int>& 
                 secondBestDist = dist;
             }
         }
-        if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.9)){
+        // cout << "Num matches: " << nMatches << "Best dist " << bestDist << " Threshold " << th << endl;
+        if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.8)){
             vMatches[i] = bestIdx;
             currFrame.setMapPoint(bestIdx,vRefMapPoints[i]);
+            // cout << "Matched " << i << " with " << bestIdx << " with distance " << bestDist << endl;
             nMatches++;
         }
     }
@@ -221,38 +223,38 @@ int searchWithProjection(Frame& currFrame, int th, std::vector<std::shared_ptr<M
         else
             radius *= 4.0;
 
-        // currFrame.getFeaturesInArea(uv.x,uv.y,radius,predictedOctave-1,predictedOctave+1,vIndicesToCheck);
+        currFrame.getFeaturesInArea(uv.x,uv.y,radius,predictedOctave-1,predictedOctave+1,vIndicesToCheck);
 
-        // cv::Mat desc = pMP->getDescriptor();
+        cv::Mat desc = pMP->getDescriptor();
 
-        // //Match with the one with the smallest Hamming distance
-        // int bestDist = 255, secondBestDist = 255;
-        // size_t bestIdx;
+        //Match with the one with the smallest Hamming distance
+        int bestDist = 255, secondBestDist = 255;
+        size_t bestIdx;
 
-        // for(auto j : vIndicesToCheck){
-        //     if(currFrame.getMapPoint(j)){
-        //         continue;
-        //     }
+        for(auto j : vIndicesToCheck){
+            if(currFrame.getMapPoint(j)){
+                continue;
+            }
 
-        //     int dist = HammingDistance(desc.row(0),currFrame.getDescriptors().row(j));
+            int dist = HammingDistance(desc.row(0),currFrame.getDescriptors().row(j));
 
-        //     if(dist < bestDist){
-        //         secondBestDist = bestDist;
-        //         bestDist = dist;
-        //         bestIdx = j;
-        //     }
-        //     else if(dist < secondBestDist){
-        //         secondBestDist = dist;
-        //     }
-        // }
+            if(dist < bestDist){
+                secondBestDist = bestDist;
+                bestDist = dist;
+                bestIdx = j;
+            }
+            else if(dist < secondBestDist){
+                secondBestDist = dist;
+            }
+        }
 
-        // if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.9)){
-        //     currFrame.setMapPoint(bestIdx,pMP);
-        //     nMatches++;
-        // }
-        // else{
-        //     noClose++;
-        // }
+        if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.8)){
+            currFrame.setMapPoint(bestIdx,pMP);
+            nMatches++;
+        }
+        else{
+            noClose++;
+        }
 
         
     }
