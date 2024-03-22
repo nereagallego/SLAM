@@ -353,10 +353,38 @@ bool Tracking::trackLocalMap() {
 }
 
 bool Tracking::needNewKeyFrame() {
-    /*
-     * Your code for Lab 4 - Task 1 here!
-     */
+    // design and implement a robust KeyFrame insertion criteria so the mapping
+    // functionality starts having some input to process
+    // Note that this method must return true if we need to insert a new KeyFrame into the mapping. Otherwise it should return false.
 
+    // Tracking is weak (low number of tracked points)
+    // More than a certain number of frames have passed since the last KeyFrame
+    // Local Mappins is idle (no new MapPoints have been added)
+
+    float threshold_featuresTracked = 0.9 * settings_.getFeaturesPerImage();
+    cout << threshold_featuresTracked << endl;
+    int threshold_framesFromLastKF = 5;
+
+    // cout << nFramesFromLastKF_ << endl;
+    if(nFramesFromLastKF_ > threshold_framesFromLastKF){
+        cout << "New keyframe introduced: Frames from last" << endl;
+        nFramesFromLastKF_ = 0;
+        return true;
+    }
+    if(nFeatTracked_ < threshold_featuresTracked){
+        cout << "New keyframe introduced: Tracking is weak" << endl;
+        nFramesFromLastKF_ = 0;
+        return true;
+    }
+
+    std::unordered_map<ID,std::shared_ptr<MapPoint>> mapPoints = pMap_->getMapPoints();
+    if(mapPoints.size() == 0){
+        cout << "New keyframe introduced: Local Mappins is idle" << endl;
+        nFramesFromLastKF_ = 0;
+        return true;
+    }
+
+    nFramesFromLastKF_++;
     return false;
 }
 

@@ -184,10 +184,10 @@ namespace g2o {
 
   void OptimizationAlgorithmLevenberg::printVerbose(std::ostream& os) const
   {
-    os
-      << "\t schur= " << _solver.schur()
-      << "\t lambda= " << FIXED(_currentLambda)
-      << "\t levenbergIter= " << _levenbergIterations;
+    // os
+    //   << "\t schur= " << _solver.schur()
+    //   << "\t lambda= " << FIXED(_currentLambda)
+    //   << "\t levenbergIter= " << _levenbergIterations;
   }
 
 } // end namespace

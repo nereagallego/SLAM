@@ -101,10 +101,21 @@ void LocalMapping::triangulateNewMapPoints() {
         //Try to triangulate a new MapPoint with each match
         for(size_t i = 0; i < vMatches.size(); i++){
             if(vMatches[i] != -1){
-                /*
-                 * Your code for Lab 4 - Task 2 here!
-                 * Note that the last KeyFrame inserted is stored at this->currKeyFrame_
-                 */
+                cv::Point2f p1 = currKeyFrame_->getKeyPoint(i).pt;
+                cv::Point2f p2 = pKF->getKeyPoint(vMatches[i]).pt;
+
+                Eigen::Vector3f xn1 = calibration1->unproject(p1);
+                Eigen::Vector3f xn2 = pKF->getCalibration()->unproject(p2);
+
+                Eigen::Vector3f x3D;
+                triangulate(xn1,xn2,T1w,T2w,x3D);
+
+                if(x3D(2) > 0 && cosRayParallax(xn1,xn2) > 0.9998 && squaredReprojectionError(p1,p2) < 2.0){
+                    vTriangulated1.push_back(currKeyFrame_->getKeyPoint(i));
+                    vTriangulated2.push_back(pKF->getKeyPoint(vMatches[i]));
+                    vMatches_.push_back(vMatches[i]);
+                    nTriangulated++;
+                }
             }
         }
     }

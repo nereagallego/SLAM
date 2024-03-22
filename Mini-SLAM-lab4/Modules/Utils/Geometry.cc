@@ -53,15 +53,19 @@ float squaredReprojectionError(cv::Point2f &p1, cv::Point2f &p2){
     float errx = p1.x - p2.x;
     float erry = p1.y - p2.y;
 
-    return errx * errx + erry *erry;
+    return errx * errx + erry * erry;
 }
 
 Eigen::Matrix<float,3,3> computeEssentialMatrixFromPose(Sophus::SE3f& T12){
     Eigen::Matrix<float,3,3> E;
 
-    /*
-     * Your code for Lab 4 - Task 2 here!
-     */
+    Eigen::Matrix<float,3,3> R = T12.rotationMatrix();
+    Eigen::Vector3f t = T12.translation();
 
+    E << 0, -t(2), t(1),
+            t(2), 0, -t(0),
+            -t(1), t(0), 0;
+
+    E = E * R;
     return E;
 }
