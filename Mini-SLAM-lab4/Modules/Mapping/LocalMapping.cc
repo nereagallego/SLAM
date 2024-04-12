@@ -104,19 +104,51 @@ void LocalMapping::triangulateNewMapPoints() {
                 cv::Point2f p1 = currKeyFrame_->getKeyPoint(i).pt;
                 cv::Point2f p2 = pKF->getKeyPoint(vMatches[i]).pt;
 
-                Eigen::Vector3f xn1 = calibration1->unproject(p1);
-                Eigen::Vector3f xn2 = pKF->getCalibration()->unproject(p2);
+                Eigen::Vector3f xn1 = calibration1->unproject(p1).normalized();
+                Eigen::Vector3f xn2 = pKF->getCalibration()->unproject(p2).normalized();
 
                 Eigen::Vector3f x3D;
                 triangulate(xn1,xn2,T1w,T2w,x3D);
 
-                if(x3D(2) > 0 && cosRayParallax(xn1,xn2) > 0.9998 && squaredReprojectionError(p1,p2) < 2.0){
+                // Reproject 3D point to the camera frame
+                Eigen::Vector3f x3Dcam = T1w*x3D;
+
+                // Normalize the point
+                x3Dcam.normalize();
+
+                // Convert to 2D point
+                cv::Point2f x2D = calibration1->project(x3Dcam);
+
+                // Reproject the 3D point to the camera frame of the second camera
+                Eigen::Vector3f x3Dcam2 = T2w*x3D;
+                x3Dcam2.normalize();
+
+                // Convert to 2D point 
+                cv::Point2f x2D2 = pKF->getCalibration()->project(x3Dcam2);
+
+                // cout << "Triangulated point: " << x3D.transpose() << endl;
+                // cout << "Point p1 " << p1 << " p2 " << x2D << " p2' " << x2D2 << endl;
+                // cout << "Reprojection error: " << squaredReprojectionError(p1,x2D) << " " << squaredReprojectionError(p2,x2D2) << endl;
+                // cout << "Parallax: " << cosRayParallax(xn1,xn2) << endl;
+                if(x3D(2) > 0 && abs(cosRayParallax(xn1 ,xn2)) < 0.998 && squaredReprojectionError(p1,x2D) < 2.0 && squaredReprojectionError(p2,x2D2) < 2.0){
+                    cout << "Triangulated new MapPoint" << endl;
                     vTriangulated1.push_back(currKeyFrame_->getKeyPoint(i));
                     vTriangulated2.push_back(pKF->getKeyPoint(vMatches[i]));
                     vMatches_.push_back(vMatches[i]);
                     nTriangulated++;
                 }
             }
+        }
+
+        // Add the new triangulated points to the Map
+        for(size_t i = 0; i < vTriangulated1.size(); i++){
+            shared_ptr<MapPoint> pMP(new MapPoint(vTriangulated1[i].pt,vTriangulated2[i].pt,currKeyFrame_->getId(),pKF->getId()));
+            pMP->setWorldPosition(x3D);
+
+            // Add the new mappoint into the map
+            // Adds the observation of the mappoint in the current keyframe
+
+        
         }
     }
 }

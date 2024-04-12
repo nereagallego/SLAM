@@ -361,9 +361,10 @@ bool Tracking::needNewKeyFrame() {
     // More than a certain number of frames have passed since the last KeyFrame
     // Local Mappins is idle (no new MapPoints have been added)
 
-    float threshold_featuresTracked = 0.9 * settings_.getFeaturesPerImage();
-    cout << threshold_featuresTracked << endl;
-    int threshold_framesFromLastKF = 5;
+    float threshold_featuresTracked = 50;
+    cout << "FromLast " << nFramesFromLastKF_ << endl;
+    cout << "Tracked " << nFeatTracked_ << endl;
+    int threshold_framesFromLastKF = 10;
 
     // cout << nFramesFromLastKF_ << endl;
     if(nFramesFromLastKF_ > threshold_framesFromLastKF){
