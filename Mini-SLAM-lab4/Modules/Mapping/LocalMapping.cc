@@ -144,7 +144,7 @@ void LocalMapping::triangulateNewMapPoints() {
 
                     nTriangulated++;
 
-                    
+                    cout << "Found new MapPoint" << endl;
                 }
             }
         }
