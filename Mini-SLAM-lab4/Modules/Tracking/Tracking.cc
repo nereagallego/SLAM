@@ -364,7 +364,7 @@ bool Tracking::needNewKeyFrame() {
     float threshold_featuresTracked = 70;
     cout << "FromLast " << nFramesFromLastKF_ << endl;
     cout << "Tracked " << nFeatTracked_ << endl;
-    int threshold_framesFromLastKF = 10;
+    int threshold_framesFromLastKF = 8;
 
     // cout << nFramesFromLastKF_ << endl;
     if(nFramesFromLastKF_ > threshold_framesFromLastKF){
