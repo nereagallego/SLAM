@@ -130,7 +130,7 @@ void LocalMapping::triangulateNewMapPoints() {
                 // cout << "Point p1 " << p1 << " p2 " << x2D << " p2' " << x2D2 << endl;
                 // cout << "Reprojection error: " << squaredReprojectionError(p1,x2D) << " " << squaredReprojectionError(p2,x2D2) << endl;
                 // cout << "Parallax: " << cosRayParallax(xn1,xn2) << endl;
-                if(x3D(2) > 0 && abs(cosRayParallax(xn1 ,xn2)) < 0.97 && squaredReprojectionError(p1,x2D) < 2.0 && squaredReprojectionError(p2,x2D2) < 2.0){
+                if(x3D(2) > 0 && abs(cosRayParallax(xn1 ,xn2)) < 0.98 && squaredReprojectionError(p1,x2D) < 2.0 && squaredReprojectionError(p2,x2D2) < 2.0){
                     cout << "Triangulated new MapPoint" << endl;
                     vTriangulated1.push_back(currKeyFrame_->getKeyPoint(i));
                     vTriangulated2.push_back(pKF->getKeyPoint(vMatches[i]));
