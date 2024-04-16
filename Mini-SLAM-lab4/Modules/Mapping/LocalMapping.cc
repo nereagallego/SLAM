@@ -149,6 +149,7 @@ void LocalMapping::triangulateNewMapPoints() {
             }
         }
     }
+    cout << "Triangulated " << nTriangulated << " new MapPoints" << endl;
 }
 
 void LocalMapping::checkDuplicatedMapPoints() {
