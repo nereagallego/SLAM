@@ -135,20 +135,20 @@ void LocalMapping::triangulateNewMapPoints() {
                     vTriangulated1.push_back(currKeyFrame_->getKeyPoint(i));
                     vTriangulated2.push_back(pKF->getKeyPoint(vMatches[i]));
                     vMatches_.push_back(vMatches[i]);
+
+                    shared_ptr<MapPoint> pMP(new MapPoint(x3D));
+
+                    // Add the new mappoint into the map
+                    pMap_->insertMapPoint(pMP);
+
+                    // Adds the observation of the mappoint in the current keyframe
+                    pMap_->addObservation(currKeyFrame_->getId(), pMP->getId(), vMatches[i]);
+
                     nTriangulated++;
+
+                    
                 }
             }
-        }
-
-        // Add the new triangulated points to the Map
-        for(size_t i = 0; i < vTriangulated1.size(); i++){
-            shared_ptr<MapPoint> pMP(new MapPoint(vTriangulated1[i].pt,vTriangulated2[i].pt,currKeyFrame_->getId(),pKF->getId()));
-            pMP->setWorldPosition(x3D);
-
-            // Add the new mappoint into the map
-            // Adds the observation of the mappoint in the current keyframe
-
-        
         }
     }
 }
