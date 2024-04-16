@@ -140,7 +140,7 @@ void LocalMapping::triangulateNewMapPoints() {
                     shared_ptr<MapPoint> pMP(new MapPoint(x3D));
 
                     pMap_->insertMapPoint(pMP);
-                    pMap_->addObservation(pMP,currKeyFrame_->getId(),i);
+                    pMap_->addObservation(currKeyFrame_->getId(), pMP->getId(),i);
 
                     nTriangulated++;
 
