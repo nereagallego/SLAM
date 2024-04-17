@@ -111,8 +111,11 @@ void LocalMapping::triangulateNewMapPoints() {
                 Eigen::Vector3f x3D;
                 triangulate(xn1,xn2,T1w,T2w,x3D);
 
+                Eigen::Vector3f x3Dw = T1w * x3D;
+                Eigen::Vector3f x3Dc = T2w * x3D;
+
                 // Check that the point is in front of both cameras
-                if(x3D(2) <= 0)
+                if(x3Dw.z() < 0 || x3Dc.z() < 0)
                     continue;
 
                 // Unproject rays and check parallax
@@ -125,9 +128,9 @@ void LocalMapping::triangulateNewMapPoints() {
                     continue;
 
                 // Check reprojection error
-                Eigen::Vector3f x3Dw = T1w * x3D;
+                
                 cv::Point2f reprojection1 = calibration1->project(x3Dw);
-                Eigen::Vector3f x3Dc = T2w * x3D;
+                
                 cv::Point2f reprojection2 = pKF->getCalibration()->project(x3Dc);
 
                 float squaredError1 = squaredReprojectionError(kp1.pt,reprojection1);
