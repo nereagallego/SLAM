@@ -51,9 +51,9 @@ void LocalMapping::doMapping(std::shared_ptr<KeyFrame> &pCurrKeyFrame) {
 }
 
 void LocalMapping::mapPointCulling() {
-    /*
-     * Your code for Lab 4 - Task 4 here!
-     */
+    // detect bad MapPoints and remove them from the map
+    // Check the recent added map points
+    
 }
 
 void LocalMapping::triangulateNewMapPoints() {
@@ -124,7 +124,7 @@ void LocalMapping::triangulateNewMapPoints() {
 
                 float cosParallax = cosRayParallax(ray1.normalized(),ray2.normalized());
 
-                if(cosParallax > 0.998)
+                if(cosParallax < 0 || cosParallax > 0.9998)
                     continue;
 
                 // Check reprojection error
@@ -135,8 +135,9 @@ void LocalMapping::triangulateNewMapPoints() {
 
                 float squaredError1 = squaredReprojectionError(kp1.pt,reprojection1);
                 float squaredError2 = squaredReprojectionError(kp2.pt,reprojection2);
+                
 
-                if(squaredError1 > 2 || squaredError2 > 2)
+                if(squaredError1 > 4 || squaredError2 > 4)
                     continue;
 
                 // Add the new MapPoint to the Map

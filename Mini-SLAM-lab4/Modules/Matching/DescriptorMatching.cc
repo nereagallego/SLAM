@@ -364,10 +364,53 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
             continue;
         }
 
-        /*
-         * Your code for Lab 4 - Task 3 here!
-         */
+        // For each MapPoint, performs a guided matching with the KeyFrame searching for a matching KeyPoint
+        // If the matched KeyPoint has no MapPoint associated, just add the observation
+        // Otherwise fuse both MapPoints into a single one, and add the observation
+        
+        // Project MapPoint into the Frame
+        Eigen::Vector3f p3Dc = Tcw*pMP->getWorldPosition();
+        cv::Point2f uv = calibration->project(p3Dc);
+
+        float radius = 15 * pKF->getScaleFactor(pKF->getKeyPoint(i).octave);
+        pKF->getFeaturesInArea(uv.x,uv.y,radius,pKF->getKeyPoint(i).octave-1,pKF->getKeyPoint(i).octave+1,vIndicesToCheck);
+
+        // Match with the one with the smallest Hamming distance
+        int bestDist = 255, secondBestDist = 255;
+        size_t bestIdx;
+
+        for(auto j : vIndicesToCheck){
+            if(vKFMps[j]){
+                continue;
+            }
+
+            int dist = HammingDistance(descMat.row(i),pKF->getDescriptors().row(j));
+
+            if(dist < bestDist){
+                secondBestDist = bestDist;
+                bestDist = dist;
+                bestIdx = j;
+            }
+            else if(dist < secondBestDist){
+                secondBestDist = dist;
+            }
+        }
+
+        if(bestDist <= th && (float)bestDist < (float(secondBestDist)*0.8)){
+            if(vKFMps[bestIdx]){
+                shared_ptr<MapPoint> pMP2 = vKFMps[bestIdx];
+                pMap->fuseMapPoints(pMP->getId(),pMP2->getId());
+                pMap->removeMapPoint(pMP2->getId());
+            }
+            else{
+                pMap->addObservation(pKF->getId(),pMP->getId(),bestIdx);
+                pKF->setMapPoint(bestIdx,pMP);
+            }
+            nFused++;
+        }
     }
+
+    cout << "Fused " << nFused << " MapPoints" << endl;
 
     return nFused;
 }
