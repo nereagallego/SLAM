@@ -400,11 +400,12 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
             if(vKFMps[bestIdx]){
                 shared_ptr<MapPoint> pMP2 = vKFMps[bestIdx];
                 pMap->fuseMapPoints(pMP->getId(),pMP2->getId());
-                pMap->removeMapPoint(pMP2->getId());
+                // pMap->removeMapPoint(pMP2->getId());
             }
             else{
-                pMap->addObservation(pKF->getId(),pMP->getId(),bestIdx);
                 pKF->setMapPoint(bestIdx,pMP);
+                pMap->addObservation(pKF->getId(),pMP->getId(),bestIdx);
+                
             }
             nFused++;
         }
