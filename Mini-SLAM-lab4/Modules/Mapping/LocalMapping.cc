@@ -53,6 +53,9 @@ void LocalMapping::doMapping(std::shared_ptr<KeyFrame> &pCurrKeyFrame) {
 void LocalMapping::mapPointCulling() {
     // detect bad MapPoints and remove them from the map
     // Check the recent added map points
+
+    // Save the first frame where the map point was observed
+    // If three keyframes later since the first tiangulation the map point has not been observed, remove it
     
 }
 
