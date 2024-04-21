@@ -55,6 +55,8 @@ int main(int argc, char **argv){
     //Process the sequence
     cv::Mat currIm;
     double currTs;
+
+    int lostFrames = 0;
     for(int i = 230; i < sequence.getLenght(); i++){
         sequence.getLeftImage(i,currIm);
         sequence.getTimeStamp(i,currTs);
@@ -67,6 +69,13 @@ int main(int argc, char **argv){
             trajectoryFile << Twc.translation()(1) << "," << Twc.translation()(2) << ",";
             trajectoryFile << Twc.unit_quaternion().x() << "," << Twc.unit_quaternion().y() << ",";
             trajectoryFile << Twc.unit_quaternion().z() << "," << Twc.unit_quaternion().w() << endl;
+        }
+        else{
+            lostFrames++;
+        }
+        if(lostFrames > 10){
+            cerr << "[Error]: too many frames lost, aborting..." << endl;
+            break;
         }
     }
 
