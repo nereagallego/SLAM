@@ -127,7 +127,7 @@ void LocalMapping::triangulateNewMapPoints() {
 
                 float cosParallax = cosRayParallax(ray1.normalized(),ray2.normalized());
 
-                if(cosParallax < 0 || cosParallax > 0.9998)
+                if(cosParallax < 0 || cosParallax > settings_.getMinCos())
                     continue;
 
                 // Check reprojection error
