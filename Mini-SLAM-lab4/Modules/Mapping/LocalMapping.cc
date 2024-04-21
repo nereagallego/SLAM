@@ -52,11 +52,39 @@ void LocalMapping::doMapping(std::shared_ptr<KeyFrame> &pCurrKeyFrame) {
 
 void LocalMapping::mapPointCulling() {
     // detect bad MapPoints and remove them from the map
-    // Check the recent added map points
-
-    // Save the first frame where the map point was observed
-    // If three keyframes later since the first tiangulation the map point has not been observed, remove it
     
+
+    // Map maintenance. Eliminate MapPoints seen only once, more than two steps ago.
+    vector<shared_ptr<MapPoint>> vMapPoints = currKeyFrame_->getMapPoints();
+
+    for(int i = 0; i < vMapPoints.size(); i++){
+        shared_ptr<MapPoint> pMP = vMapPoints[i];
+        if(pMP){
+            int nObs = pMap_->getNumberOfObservations(pMP->getId());
+            // cout << "MapPoint " << pMP->getId() << " has " << nObs << " observations" << endl;
+            if(nObs == 1){
+                cout << "MapPoint " << pMP->getId() << " only seen once" << endl;
+                
+                // If the MapPoint is seen once but less than 3 KeyFrames before, it is kept in the map
+                if(pMap_->isMapPointInKeyFrame(pMP->getId(), currKeyFrame_->getId())
+                    || pMap_->isMapPointInKeyFrame(pMP->getId(), currKeyFrame_->getId()-1)
+                    || pMap_->isMapPointInKeyFrame(pMP->getId(), currKeyFrame_->getId()-2)){
+                    continue;
+                }
+
+                // Search the keyframe that contains the MapPoint and remove the observation
+                for (int j = currKeyFrame_->getId()-3; j > 0; j--){
+                    shared_ptr<KeyFrame> pKF = pMap_->getKeyFrame(j);
+                    if(pMap_->isMapPointInKeyFrame(pMP->getId(), currKeyFrame_->getId())){
+                        pMap_->removeObservation(pKF->getId(),pMP->getId());
+                        pMap_->removeMapPoint(pMP->getId());
+                        cout << "MapPoint " << pMP->getId() << " removed" << endl;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void LocalMapping::triangulateNewMapPoints() {
